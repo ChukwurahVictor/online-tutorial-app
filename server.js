@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
@@ -8,7 +10,7 @@ const tutorRoutes = require('./routes/tutor');
 const adminRoutes = require('./routes/admin');
 
 //DB Config
-mongoose.connect('mongodb://localhost/playdb', { 
+mongoose.connect('mongodb+srv://dbWebster:'+ process.env.MONGO_PW +'@online-tutor-app-vnpna.mongodb.net/test?retryWrites=true&w=majority', { 
    useNewUrlParser: true, 
    useCreateIndex: true, 
    useUnifiedTopology: true 
@@ -38,7 +40,6 @@ app.use((req, res, next) => {
    next(error)
 })
 
-//Port listener
 app.use((error, req, res, next) => {
    res.status(error.status || 500)
    res.json({
@@ -48,6 +49,9 @@ app.use((error, req, res, next) => {
    })
 })
 
-app.listen('4000', () => {
-   console.log('Server running on port 4000')
+//Port listener
+PORT = process.env.PORT || 4000
+
+app.listen(PORT, () => {
+   console.log(`Server running on port ${PORT}`)
 })
