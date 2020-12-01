@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const Subject = require('./Subject');
+const Lesson = require('./Lesson');
+
 const userSchema = new Schema({
    name: {
       type: String
@@ -17,12 +20,18 @@ const userSchema = new Schema({
       type: Boolean,
       default: false
    },
-   subjects: {
-      type: Array
+   role: {
+      type: String,
+      enum: ['student', 'tutor'],
+      default: 'student'
    },
+   subjects: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subject"
+   }],
    lessons: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Tutor'
+      ref: 'lesson'
    }],
 }, {
    timestamps: true
