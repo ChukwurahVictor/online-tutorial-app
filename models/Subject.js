@@ -9,7 +9,11 @@ const subjectSchema = new Schema({
    category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Category'
-   }
+   },
+   tutors: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+   }]
 }, {
    timestamps: true
 })

@@ -1,65 +1,58 @@
 const User = require('../models/User');
-const Tutor = require('../models/Tutor');
+const Subject = require('../models/Subject');
 const Lesson = require('../models/Lesson');
+const { response } = require('express');
+const { find } = require('../models/Subject');
 
-exports.log_of_tutors = (req, res, next) => {
-   Tutor.find()
-   .exec()
-   .then(docs => {
-      console.log(docs),
-      res.status(200).json({
-         count: docs.length,
-         tutors: docs.map(doc => {
-            return {
-               id: doc._id,
-               name: doc.name,
-               email: doc.email
-            }
-         })
-      })
-   })
-   .catch(err => {
-      res.status(500).json({
-         error: err
-      })
-   })
-}
-
-exports.createLesson = (req, res, next) => {
-   const lesson = new Lesson({
-      title: req.body.title
-   })
-   lesson
-   .save()
-   .then(result => {
-      console.log(result);
-      res.status(201).json({
-         status: true,
-         message: "Created lesson success"
-      })
-   })
-   .catch(err => {
-      console.log(err);
-      res.status(500).json({
-         error: err
-      })
-   })
-}
-
-exports.bookLesson = (req, res, next) => {
-   Lesson.findById(req.params.lessonId)
-   .then(lesson => {
-      if (!lesson) {
-         return res.json({
-            message: "Lesson not found"
+exports.subjectTutors = async(req, res, next) => {
+   try {
+      const { subjectId } = req.params;
+      const subject = await Subject.findById(subjectId).populate('tutors')
+      if(!subject) {
+         return res.status(423).send({
+            status: 'failed',
+            message: 'Subject not found!'
          })
       }
-      res.send(lesson)
-   })
-   .catch(err => {
-      console.log(err);
-      res.status(500).json({
-         error: err
+      return res.status(200).send({
+         status: 'success',
+         subject
       })
-   })
+   } catch (err) {
+      console.log(err)
+   }
 }
+
+exports.bookLesson = async(user, req, res, next) => {
+   try {
+      const lesson = req.body;
+      const tutor = await User.findById(lesson.tutor);
+      if(!tutor || tutor.role != 'tutor') {
+         return res.status(400).send({
+            status: 'failed',
+            message: 'Tutor does not exist'
+         })
+      }
+      const findLesson = await Lesson.find({ title: lesson.title });
+      if(findLesson) {
+         return res.status(400).send({
+            status: 'failed',
+            message: 'Lesson title already exist'
+         })
+      }
+      const newLesson = new Lesson(lesson);
+      newLesson.student.push(user);
+      user.lessons.push(newLesson);
+      await user.save();
+      await newLesson.save();
+      res.send({
+         status: 'failed',
+         message: 'Lesson created successfully',
+         newLesson
+      })
+   } catch (err) {
+      console.log(err);
+   }
+}
+
+

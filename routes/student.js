@@ -1,23 +1,11 @@
 const router = require('express').Router();
-const { signUp, logIn } = require('../controllers/auth');
-const { createLesson, bookLesson } = require('../controllers/student');
-const ensureAuthenticated = require('../middleware/check-auth');
-
-//Student signup
-router.post('/signup/student', signUp);
-
-//Student login
-router.post('/login/student', logIn);
+const { subjectTutors, bookLesson } = require('../controllers/student');
+const { isAuthenticated } = require('../middleware/check-auth');
 
 //All tutors taking a course
-router.get('/tutors/:subjectId', (req, res) => {
-   res.send('nothing')
-})
-
-//Create a lesson
-router.post('/lesson', ensureAuthenticated, createLesson)
+router.get('/subjects/:subjectId', isAuthenticated, subjectTutors);
 
 //Book a lesson
-router.post('/lesson/:lessonId', bookLesson)
+router.post('/lessons', isAuthenticated, bookLesson);
 
 module.exports = router;
